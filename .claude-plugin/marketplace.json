@@ -1,0 +1,213 @@
+{
+  "name": "clawshelf",
+  "description": "Free Agent Skills by ClawShelf. Each pack is a plugin that bundles standard SKILL.md skills.",
+  "owner": {
+    "name": "ClawShelf",
+    "url": "https://clawshelf.com"
+  },
+  "plugins": [
+    {
+      "name": "memory-starter-kit",
+      "source": "./",
+      "skills": [
+        "./skills/basic-memory",
+        "./skills/personal-context"
+      ],
+      "displayName": "Memory Starter Kit",
+      "description": "Equip your agent with persistent memory and personal context to maintain continuity and recognize user preferences across every session.",
+      "version": "1.1.0",
+      "category": "productivity",
+      "license": "MIT",
+      "homepage": "https://clawshelf.com/skill/clawshelf-team-memory-starter-kit",
+      "metadata": {
+        "clawshelf": {
+          "kind": "pack",
+          "summaryZh": "为 Agent 配齐持久记忆和个人档案，跨对话保持连贯，记住你的偏好。",
+          "releaseNotes": "Packs are now Claude Code plugins too: /plugin marketplace add billyhetech/clawshelf-skills."
+        }
+      }
+    },
+    {
+      "name": "security-first-kit",
+      "source": "./",
+      "skills": [
+        "./skills/openclaw-hardening",
+        "./skills/permission-guard",
+        "./skills/skill-scanner"
+      ],
+      "displayName": "Security First Kit",
+      "description": "Secure your agent setup by hardening configurations, monitoring agent behavior, and vetting every skill before installation.",
+      "version": "1.1.0",
+      "category": "security",
+      "license": "MIT",
+      "homepage": "https://clawshelf.com/skill/clawshelf-team-security-first-kit",
+      "metadata": {
+        "clawshelf": {
+          "kind": "pack",
+          "summaryZh": "加固安装配置、监控 Agent 行为、安装前审查每个技能，一套装齐。",
+          "releaseNotes": "Moved to the public clawshelf-skills repo; installs in any Agent Skills-compatible agent."
+        }
+      }
+    },
+    {
+      "name": "day-one-kit",
+      "source": "./",
+      "skills": [
+        "./skills/morning-brief",
+        "./skills/quick-reminder",
+        "./skills/smart-summarizer"
+      ],
+      "displayName": "Day One Kit",
+      "description": "Start every day organized: a morning briefing, natural-language reminders, and instant summaries of anything you read or watch.",
+      "version": "1.0.0",
+      "category": "productivity",
+      "license": "MIT",
+      "homepage": "https://clawshelf.com/skill/clawshelf-team-day-one-kit",
+      "metadata": {
+        "clawshelf": {
+          "kind": "pack",
+          "summaryZh": "从第一天就井井有条：晨间简报、自然语言提醒，读到看到的内容一键摘要。",
+          "releaseNotes": "First release in the public clawshelf-skills repo."
+        }
+      }
+    },
+    {
+      "name": "basic-memory",
+      "source": "./",
+      "skills": [
+        "./skills/basic-memory"
+      ],
+      "displayName": "Basic Memory",
+      "description": "Equip your agent with persistent memory by automatically saving facts, preferences, and decisions across every conversation session.",
+      "version": "1.1.0",
+      "category": "productivity",
+      "license": "MIT",
+      "homepage": "https://clawshelf.com/skill/clawshelf-team-basic-memory",
+      "metadata": {
+        "clawshelf": {
+          "kind": "skill"
+        }
+      }
+    },
+    {
+      "name": "morning-brief",
+      "source": "./",
+      "skills": [
+        "./skills/morning-brief"
+      ],
+      "displayName": "Morning Brief",
+      "description": "A concise, prioritized daily briefing: weather, today's schedule, urgent email highlights, and a suggested action plan.",
+      "version": "1.0.0",
+      "category": "productivity",
+      "homepage": "https://clawshelf.com/skill/clawshelf-team-morning-brief",
+      "metadata": {
+        "clawshelf": {
+          "kind": "skill"
+        }
+      }
+    },
+    {
+      "name": "openclaw-hardening",
+      "source": "./",
+      "skills": [
+        "./skills/openclaw-hardening"
+      ],
+      "displayName": "OpenClaw Hardening",
+      "description": "Harden your OpenClaw setup by auditing security misconfigurations like exposed listeners, missing auth, and insecure permissions before installing additional skills.",
+      "version": "1.1.0",
+      "category": "security",
+      "homepage": "https://clawshelf.com/skill/clawshelf-team-openclaw-hardening",
+      "metadata": {
+        "clawshelf": {
+          "kind": "skill"
+        }
+      }
+    },
+    {
+      "name": "permission-guard",
+      "source": "./",
+      "skills": [
+        "./skills/permission-guard"
+      ],
+      "displayName": "Permission Guard",
+      "description": "Secure your OpenClaw agent by monitoring skill behavior, detecting unauthorized access, and generating detailed permission audit reports.",
+      "version": "1.1.0",
+      "category": "security",
+      "homepage": "https://clawshelf.com/skill/clawshelf-team-permission-guard",
+      "metadata": {
+        "clawshelf": {
+          "kind": "skill"
+        }
+      }
+    },
+    {
+      "name": "personal-context",
+      "source": "./",
+      "skills": [
+        "./skills/personal-context"
+      ],
+      "displayName": "Personal Context",
+      "description": "Personalize every session by building a persistent profile that remembers your name, timezone, and communication style.",
+      "version": "1.1.0",
+      "category": "productivity",
+      "license": "MIT",
+      "homepage": "https://clawshelf.com/skill/clawshelf-team-personal-context",
+      "metadata": {
+        "clawshelf": {
+          "kind": "skill"
+        }
+      }
+    },
+    {
+      "name": "quick-reminder",
+      "source": "./",
+      "skills": [
+        "./skills/quick-reminder"
+      ],
+      "displayName": "Quick Reminder",
+      "description": "Set, manage, and receive reminders in plain natural language.",
+      "version": "1.0.0",
+      "category": "productivity",
+      "homepage": "https://clawshelf.com/skill/clawshelf-team-quick-reminder",
+      "metadata": {
+        "clawshelf": {
+          "kind": "skill"
+        }
+      }
+    },
+    {
+      "name": "skill-scanner",
+      "source": "./",
+      "skills": [
+        "./skills/skill-scanner"
+      ],
+      "displayName": "Skill Scanner",
+      "description": "Protect your agent by scanning skills for malicious patterns, prompt injections, and permission abuse before you install them.",
+      "version": "1.1.0",
+      "category": "security",
+      "homepage": "https://clawshelf.com/skill/clawshelf-team-skill-scanner",
+      "metadata": {
+        "clawshelf": {
+          "kind": "skill"
+        }
+      }
+    },
+    {
+      "name": "smart-summarizer",
+      "source": "./",
+      "skills": [
+        "./skills/smart-summarizer"
+      ],
+      "displayName": "Smart Summarizer",
+      "description": "Transform long articles, videos, and PDFs into concise digests with TL;DRs and actionable insights in seconds.",
+      "version": "1.1.0",
+      "category": "productivity",
+      "homepage": "https://clawshelf.com/skill/clawshelf-team-smart-summarizer",
+      "metadata": {
+        "clawshelf": {
+          "kind": "skill"
+        }
+      }
+    }
+  ]
+}

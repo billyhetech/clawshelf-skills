@@ -1,54 +1,77 @@
 # ClawShelf Skills
 
-Free [Agent Skills](https://agentskills.io) made by [ClawShelf](https://clawshelf.com). Each skill is a standard `SKILL.md` folder, so it works in Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode, OpenClaw and every other agent that supports the format.
+Free [Agent Skills](https://agentskills.io) made by [ClawShelf](https://clawshelf.com). Every skill is a standard `SKILL.md` folder, so it works in Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode, OpenClaw and every other agent that supports the Agent Skills standard.
 
 [中文说明](./README.zh-CN.md)
 
 ## Install
 
+**Any agent** (via the [skills CLI](https://github.com/vercel-labs/skills)):
+
 ```bash
-# pick skills interactively
-npx skills add billyhetech/clawshelf-skills
-
-# or install one skill
-npx skills add billyhetech/clawshelf-skills --skill basic-memory
-
-# keep them up to date
-npx skills update
+npx skills add billyhetech/clawshelf-skills                          # pick interactively
+npx skills add billyhetech/clawshelf-skills --skill basic-memory     # one skill
+npx skills update                              # keep them up to date
 ```
 
-Prefer to browse first? Every skill has a page with examples on [clawshelf.com/skills](https://clawshelf.com/skills).
+**Claude Code** — every skill and every pack is also a plugin in this marketplace:
+
+```
+/plugin marketplace add billyhetech/clawshelf-skills
+/plugin install memory-starter-kit@clawshelf
+```
+
+## Packs
+
+A pack is a plugin that bundles several skills for one job. The skills stay standard `SKILL.md` folders, so you can also install them one by one.
+
+| Pack | Skills | Install in any agent | Claude Code |
+|---|---|---|---|
+| **Memory Starter Kit** — Equip your agent with persistent memory and personal context to maintain continuity and recognize user preferences across every session. | `basic-memory`, `personal-context` | `npx skills add billyhetech/clawshelf-skills --skill basic-memory --skill personal-context` | `/plugin install memory-starter-kit --marketplace billyhetech/clawshelf-skills` |
+| **Security First Kit** — Secure your agent setup by hardening configurations, monitoring agent behavior, and vetting every skill before installation. | `openclaw-hardening`, `permission-guard`, `skill-scanner` | `npx skills add billyhetech/clawshelf-skills --skill openclaw-hardening --skill permission-guard --skill skill-scanner` | `/plugin install security-first-kit --marketplace billyhetech/clawshelf-skills` |
+| **Day One Kit** — Start every day organized: a morning briefing, natural-language reminders, and instant summaries of anything you read or watch. | `morning-brief`, `quick-reminder`, `smart-summarizer` | `npx skills add billyhetech/clawshelf-skills --skill morning-brief --skill quick-reminder --skill smart-summarizer` | `/plugin install day-one-kit --marketplace billyhetech/clawshelf-skills` |
 
 ## Skills
 
-| Skill | What it does |
-|---|---|
-| [`basic-memory`](./skills/basic-memory) | Persistent memory across conversations: saves and recalls facts, decisions and preferences. |
-| [`personal-context`](./skills/personal-context) | A personal profile (name, role, timezone, goals, style) so your agent knows who it is working with. |
+| Skill | What it does | Claude Code |
+|---|---|---|
+| [`basic-memory`](./skills/basic-memory) | Equip your agent with persistent memory by automatically saving facts, preferences, and decisions across every conversation session. | `/plugin install basic-memory --marketplace billyhetech/clawshelf-skills` |
+| [`morning-brief`](./skills/morning-brief) | A concise, prioritized daily briefing: weather, today's schedule, urgent email highlights, and a suggested action plan. | `/plugin install morning-brief --marketplace billyhetech/clawshelf-skills` |
+| [`openclaw-hardening`](./skills/openclaw-hardening) | Harden your OpenClaw setup by auditing security misconfigurations like exposed listeners, missing auth, and insecure permissions before installing additional skills. | `/plugin install openclaw-hardening --marketplace billyhetech/clawshelf-skills` |
+| [`permission-guard`](./skills/permission-guard) | Secure your OpenClaw agent by monitoring skill behavior, detecting unauthorized access, and generating detailed permission audit reports. | `/plugin install permission-guard --marketplace billyhetech/clawshelf-skills` |
+| [`personal-context`](./skills/personal-context) | Personalize every session by building a persistent profile that remembers your name, timezone, and communication style. | `/plugin install personal-context --marketplace billyhetech/clawshelf-skills` |
+| [`quick-reminder`](./skills/quick-reminder) | Set, manage, and receive reminders in plain natural language. | `/plugin install quick-reminder --marketplace billyhetech/clawshelf-skills` |
+| [`skill-scanner`](./skills/skill-scanner) | Protect your agent by scanning skills for malicious patterns, prompt injections, and permission abuse before you install them. | `/plugin install skill-scanner --marketplace billyhetech/clawshelf-skills` |
+| [`smart-summarizer`](./skills/smart-summarizer) | Transform long articles, videos, and PDFs into concise digests with TL;DRs and actionable insights in seconds. | `/plugin install smart-summarizer --marketplace billyhetech/clawshelf-skills` |
+
+Every skill also has a page with details on [clawshelf.com/skills](https://clawshelf.com/skills).
 
 ## How this repo works
 
 - **Only skills made by ClawShelf live here.** Third-party skills listed on ClawShelf install from their authors' own repos and stay credited to them.
-- Every change is a pull request. CI checks that each `SKILL.md` follows the spec and that the skills CLI can discover it.
-- Merging to `master` publishes the update: `npx skills update` picks it up, and clawshelf.com refreshes its catalog.
-- Premium (Pro) skills are not in this repo; they install from clawshelf.com with an API key.
+- Packs are defined in [`.claude-plugin/marketplace.json`](./.claude-plugin/marketplace.json) (the Claude Code marketplace format). Single-skill entries are generated by `node scripts/marketplace.mjs`; pack entries are written by hand.
+- Every change is a pull request. CI runs the official [agentskills validator](https://github.com/agentskills/agentskills), `claude plugin validate`, house rules (`scripts/validate.mjs`) and checks that the skills CLI can discover every skill.
+- Merging to `master` publishes the update: `npx skills update` and Claude Code plugin updates pick it up, and clawshelf.com refreshes its catalog.
+- Premium (Pro) skills are not in this repo; Pro members install them from clawshelf.com or from their agent with an API key.
 
 ## Publishing (maintainers)
 
-Every push to `master` that touches `skills/` or `packs/` runs `.github/workflows/publish.yml`. It zips each changed skill, uploads it to ClawShelf's storage, and updates its page on clawshelf.com. Bump `version` to add a changelog entry. Optional fields in `SKILL.md` frontmatter:
+`.github/workflows/publish.yml` runs on every push to `master` that touches `skills/` or `.claude-plugin/`. It zips each changed skill or pack, uploads it to ClawShelf's storage and updates its page on clawshelf.com. Bump `version` to add a changelog entry.
+
+`SKILL.md` metadata follows the Agent Skills spec (a flat map of strings):
 
 ```yaml
 metadata:
-  clawshelf:
-    title: Basic Memory          # display name (default: from the folder name)
-    summary: One sentence …      # ≤ 300 chars (default: first sentence of description)
-    summary_zh: 一句话中文简介      # ≤ 200 chars
-    category: productivity       # a clawshelf.com category
-    version: 1.1.0               # bump to record a release
-    release_notes: What changed  # default: the commit message
+  version: "1.1.0"                       # bump to record a release
+  clawshelf-title: "Basic Memory"        # display name (default: from the folder name)
+  clawshelf-summary: "One sentence …"    # ≤ 300 chars (default: first sentence of description)
+  clawshelf-summary-zh: "一句话中文简介"     # ≤ 200 chars
+  clawshelf-category: "productivity"     # a clawshelf.com category
+  clawshelf-output-type: "video"         # optional: video | slides | web | image | workflow
+  clawshelf-release-notes: "What changed" # default: the commit message
 ```
 
-Packs live in `packs/<name>/PACK.md` with a `skills:` list.
+After adding or renaming a skill, run `node scripts/marketplace.mjs` and commit `.claude-plugin/marketplace.json`.
 
 ## License
 
