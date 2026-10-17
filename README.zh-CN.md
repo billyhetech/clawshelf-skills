@@ -30,12 +30,12 @@ npx skills update
 
 - **这里只放 ClawShelf 自己做的技能。** ClawShelf 上收录的第三方技能从原作者的仓库安装，并注明作者。
 - 所有改动都走 Pull Request，CI 会检查每个 `SKILL.md` 是否符合规范、能否被 skills CLI 发现。
-- 合并到 `main` 即发布：`npx skills update` 会拿到更新，clawshelf.com 也会同步刷新。
+- 合并到 `master` 即发布：`npx skills update` 会拿到更新，clawshelf.com 也会同步刷新。
 - 付费（Pro）技能不在这个仓库，通过 clawshelf.com 用 API Key 安装。
 
 ## 发布（维护者）
 
-每次推送到 `main` 且改动了 `skills/` 或 `packs/`，`.github/workflows/publish.yml` 会自动把有改动的技能打包、上传到 ClawShelf 的存储，并更新 clawshelf.com 上的页面。修改 `version` 会新增一条更新日志。`SKILL.md` frontmatter 的可选字段：
+每次推送到 `master` 且改动了 `skills/` 或 `packs/`，`.github/workflows/publish.yml` 会自动把有改动的技能打包、上传到 ClawShelf 的存储，并更新 clawshelf.com 上的页面。修改 `version` 会新增一条更新日志。`SKILL.md` frontmatter 的可选字段：
 
 ```yaml
 metadata:

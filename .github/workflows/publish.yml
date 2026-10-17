@@ -1,10 +1,10 @@
 name: Publish to clawshelf.com
 
-# Free skills publish from this repo on every push to main. The private
+# Free skills publish from this repo on every push to master. The private
 # clawshelf-skills-pro repo calls this same workflow with pricing: premium.
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths: ['skills/**', 'packs/**']
   workflow_dispatch:
     inputs:
