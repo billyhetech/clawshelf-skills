@@ -54,6 +54,28 @@ for (const name of readdirSync(ROOT)) {
   }
 }
 
+// Packs: packs/<name>/PACK.md must list skills that exist in this repo
+if (statSync('packs', { throwIfNoEntry: false })?.isDirectory()) {
+  const skillNames = new Set(readdirSync(ROOT));
+  for (const name of readdirSync('packs')) {
+    const where = join('packs', name, 'PACK.md');
+    let text;
+    try {
+      text = readFileSync(where, 'utf8');
+    } catch {
+      errors.push(`packs/${name}: missing PACK.md`);
+      continue;
+    }
+    const fm = frontmatter(text);
+    if (!fm || fm.name !== name) errors.push(`${where}: name must equal folder "${name}"`);
+    const listed = [...text.matchAll(/^\s+-\s+([a-z0-9-]+)\s*$/gm)].map((m) => m[1]);
+    if (listed.length === 0) errors.push(`${where}: list its skills under \`skills:\``);
+    for (const skill of listed) {
+      if (!skillNames.has(skill)) errors.push(`${where}: unknown skill "${skill}"`);
+    }
+  }
+}
+
 if (errors.length > 0) {
   console.error(errors.map((e) => `✗ ${e}`).join('\n'));
   process.exit(1);
