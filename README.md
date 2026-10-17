@@ -38,13 +38,24 @@ A pack is a plugin that bundles several skills for one job. The skills stay stan
 | [`basic-memory`](./skills/basic-memory) | Equip your agent with persistent memory by automatically saving facts, preferences, and decisions across every conversation session. | `/plugin install basic-memory --marketplace billyhetech/clawshelf-skills` |
 | [`morning-brief`](./skills/morning-brief) | A concise, prioritized daily briefing: weather, today's schedule, urgent email highlights, and a suggested action plan. | `/plugin install morning-brief --marketplace billyhetech/clawshelf-skills` |
 | [`openclaw-hardening`](./skills/openclaw-hardening) | Harden your OpenClaw setup by auditing security misconfigurations like exposed listeners, missing auth, and insecure permissions before installing additional skills. | `/plugin install openclaw-hardening --marketplace billyhetech/clawshelf-skills` |
-| [`permission-guard`](./skills/permission-guard) | Secure your OpenClaw agent by monitoring skill behavior, detecting unauthorized access, and generating detailed permission audit reports. | `/plugin install permission-guard --marketplace billyhetech/clawshelf-skills` |
+| [`permission-guard`](./skills/permission-guard) | Secure your agent by monitoring skill behavior, detecting unauthorized access, and generating detailed permission audit reports. | `/plugin install permission-guard --marketplace billyhetech/clawshelf-skills` |
 | [`personal-context`](./skills/personal-context) | Personalize every session by building a persistent profile that remembers your name, timezone, and communication style. | `/plugin install personal-context --marketplace billyhetech/clawshelf-skills` |
 | [`quick-reminder`](./skills/quick-reminder) | Set, manage, and receive reminders in plain natural language. | `/plugin install quick-reminder --marketplace billyhetech/clawshelf-skills` |
 | [`skill-scanner`](./skills/skill-scanner) | Protect your agent by scanning skills for malicious patterns, prompt injections, and permission abuse before you install them. | `/plugin install skill-scanner --marketplace billyhetech/clawshelf-skills` |
 | [`smart-summarizer`](./skills/smart-summarizer) | Transform long articles, videos, and PDFs into concise digests with TL;DRs and actionable insights in seconds. | `/plugin install smart-summarizer --marketplace billyhetech/clawshelf-skills` |
 
 Every skill also has a page with details on [clawshelf.com/skills](https://clawshelf.com/skills).
+
+## Portability
+
+Every skill must work unchanged in every [Agent Skills client](https://agentskills.io/clients), not only OpenClaw ([spec](https://agentskills.io/specification)):
+
+- **Frontmatter**: only spec fields (`name`, `description`, `license`, `compatibility`, `metadata`). `name` matches the folder.
+- **`compatibility`**: only for a real requirement (a CLI, a Google account, internet, a background service). A skill built for one agent on purpose says so there ("Designed for OpenClaw").
+- **No agent-specific paths**: a skill's own data goes in the relative folder `.clawshelf/<skill-name>/` in the agent's working directory, and each data skill ends with the same `## Saving Data` section. Files that must be shared across projects (the reminder service, the morning-brief account) live in `~/.clawshelf/`, never in one agent's folder.
+- **No agent-specific setup or tools**: say "the agent's always-on instructions" or "the agent's own file search", not one agent's file, setting or command.
+- **Optional extras fall back**: session-start loading, scheduling and other skills are optional, each with an on-demand path.
+- **`## Rules` right after `## Purpose`**, so the hard rules survive when an agent keeps only the start of a skill.
 
 ## How this repo works
 

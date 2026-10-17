@@ -1,26 +1,23 @@
 # Profile Schema Reference
 
-Defines the structure of `~/.openclaw/workspace/me.json`. Read this when writing or updating the profile, or when you need to understand what fields are available.
+Defines the structure of `me.json` (in `.clawshelf/personal-context/`, see SKILL.md). Read this when writing or updating the profile, or when you need to understand what fields are available.
 
 ---
 
-## File Location & Relationship to System Files
+## Relationship to an Agent's Own Profile
 
-| File | Path | Managed by |
-|---|---|---|
-| Our profile | `~/.openclaw/workspace/me.json` | This skill (user-editable) |
-| System profile | `~/.openclaw/memory/user_profile.json` | OpenClaw (auto-updated) |
-
-The two files serve different purposes and coexist without conflict. `me.json` captures what the user told us during onboarding — explicit, human-readable, editable. The system's `user_profile.json` tracks behavioral patterns inferred automatically. When the two conflict, prefer the user's explicit input in `me.json`.
+Some agents keep a profile of their own that they update automatically from behavior. `me.json` captures what the user told us during onboarding — explicit, human-readable, editable. The two coexist without conflict; when they disagree, prefer the user's explicit input in `me.json`.
 
 ---
 
 ## Full Schema
 
+The values below are examples — fill in the user's own.
+
 ```json
 {
-  "name": "Billy",
-  "role": "AI Algorithm Engineer",
+  "name": "Sam",
+  "role": "Product Designer",
   "company": "Startup (building a product)",
   "timezone": "America/Los_Angeles",
   "primary_goals": ["content creation", "product development"],
@@ -90,7 +87,7 @@ The schema is intentionally open. If the user mentions something important that 
 
 ```json
 {
-  "name": "Billy",
+  "name": "Sam",
   "preferred_language": "English with Chinese for technical terms",
   "editor": "VS Code",
   "created": "2026-04-09",
@@ -107,8 +104,8 @@ Use lowercase snake_case names. Only add values you'd actually use to personaliz
 | What | Where |
 |---|---|
 | Identity (name, role, timezone, goals, style) | `me.json` — set once, updated rarely |
-| Decisions, tasks, daily context | `~/.openclaw/workspace/MEMORY.md` |
-| Running conversation highlights | `~/.openclaw/workspace/memory/YYYY-MM-DD.md` |
+| Decisions, tasks, daily context | `MEMORY.md` (basic-memory) |
+| Running conversation highlights | `memory/YYYY-MM-DD.md` (basic-memory) |
 
 Don't duplicate identity-level facts in `MEMORY.md` if they're already in `me.json`. Let each file own its layer.
 

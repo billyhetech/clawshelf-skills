@@ -4,11 +4,12 @@
 
 set -e
 
-OPENCLAW_DIR="$HOME/.openclaw"
-BIN_DIR="$OPENCLAW_DIR/bin"
+CLAWSHELF_DIR="$HOME/.clawshelf"
+BIN_DIR="$CLAWSHELF_DIR/bin"
 DAEMON_SRC="$(cd "$(dirname "$0")" && pwd)/remind-daemon.py"
 DAEMON_DEST="$BIN_DIR/remind-daemon.py"
-PID_FILE="$OPENCLAW_DIR/remind-daemon.pid"
+PID_FILE="$CLAWSHELF_DIR/remind-daemon.pid"
+LEGACY_PID_FILE="$HOME/.openclaw/remind-daemon.pid"
 
 CYAN='\033[0;36m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
 
@@ -63,6 +64,12 @@ ok "Daemon installed to $DAEMON_DEST"
 
 step "Step 3/4  Configure auto-start"
 
+# Versions before 1.1.0 ran from ~/.openclaw; stop that daemon (its reminders move over on first start)
+if [ -f "$LEGACY_PID_FILE" ]; then
+    kill "$(cat "$LEGACY_PID_FILE")" 2>/dev/null || true
+    rm -f "$LEGACY_PID_FILE"
+fi
+
 OS="$(uname -s)"
 
 if [[ "$OS" == "Darwin" ]]; then
@@ -88,9 +95,9 @@ if [[ "$OS" == "Darwin" ]]; then
     <key>KeepAlive</key>
     <true/>
     <key>StandardOutPath</key>
-    <string>$OPENCLAW_DIR/remind-daemon.log</string>
+    <string>$CLAWSHELF_DIR/remind-daemon.log</string>
     <key>StandardErrorPath</key>
-    <string>$OPENCLAW_DIR/remind-daemon.log</string>
+    <string>$CLAWSHELF_DIR/remind-daemon.log</string>
 </dict>
 </plist>
 EOF
@@ -136,14 +143,17 @@ EOF
         [[ "$SHELL" == *zsh* ]] && SHELL_RC="$HOME/.zshrc"
         [[ "$SHELL" == *fish* ]] && warn "Fish shell detected — add startup manually (see references/setup-linux.md)"
 
-        if ! grep -q "ClawShelf Reminder Daemon" "$SHELL_RC" 2>/dev/null; then
-            echo "" >> "$SHELL_RC"
-            echo "$STARTUP_LINE" >> "$SHELL_RC"
-            echo "$LAUNCH_LINE" >> "$SHELL_RC"
-            ok "Startup line added to $SHELL_RC"
-        else
-            ok "Startup line already in $SHELL_RC"
+        # Replace any earlier startup lines (they may point at an old path)
+        if grep -q "ClawShelf Reminder Daemon" "$SHELL_RC" 2>/dev/null; then
+            TMP_RC="$(mktemp)"
+            grep -v -e "ClawShelf Reminder Daemon" -e "remind-daemon.py" "$SHELL_RC" > "$TMP_RC" || true
+            cat "$TMP_RC" > "$SHELL_RC"   # write in place: keeps a symlinked rc file intact
+            rm -f "$TMP_RC"
         fi
+        echo "" >> "$SHELL_RC"
+        echo "$STARTUP_LINE" >> "$SHELL_RC"
+        echo "$LAUNCH_LINE" >> "$SHELL_RC"
+        ok "Startup line added to $SHELL_RC"
 
         # Start now
         eval "$LAUNCH_LINE"
@@ -168,7 +178,7 @@ if [ -f "$PID_FILE" ]; then
         if [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
             ok "Daemon started (PID $(cat "$PID_FILE"))"
         else
-            warn "Could not confirm daemon status — check $OPENCLAW_DIR/remind-daemon.log"
+            warn "Could not confirm daemon status — check $CLAWSHELF_DIR/remind-daemon.log"
         fi
     fi
 else
@@ -178,7 +188,7 @@ else
     if [ -f "$PID_FILE" ]; then
         ok "Daemon started (PID $(cat "$PID_FILE"))"
     else
-        warn "Daemon may not have started — check $OPENCLAW_DIR/remind-daemon.log"
+        warn "Daemon may not have started — check $CLAWSHELF_DIR/remind-daemon.log"
     fi
 fi
 
@@ -200,10 +210,10 @@ echo "======================================"
 echo -e "  ${GREEN}Setup complete!${NC}"
 echo ""
 echo "  Reminders written by any agent to"
-echo "  ~/.openclaw/reminders.json will now"
+echo "  ~/.clawshelf/reminders.json will now"
 echo "  be delivered as system notifications."
 echo ""
-echo "  Daemon log:   $OPENCLAW_DIR/remind-daemon.log"
+echo "  Daemon log:   $CLAWSHELF_DIR/remind-daemon.log"
 echo "  Stop daemon:  kill \$(cat $PID_FILE)"
 echo "  Restart:      $PYTHON $DAEMON_DEST &"
 echo "======================================"

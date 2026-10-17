@@ -4,11 +4,12 @@
 
 $ErrorActionPreference = "Stop"
 
-$openclawDir  = "$env:USERPROFILE\.openclaw"
-$binDir       = "$openclawDir\bin"
+$clawshelfDir = "$env:USERPROFILE\.clawshelf"
+$binDir       = "$clawshelfDir\bin"
 $daemonSrc    = Join-Path $PSScriptRoot "remind-daemon.py"
 $daemonDest   = "$binDir\remind-daemon.py"
-$pidFile      = "$openclawDir\remind-daemon.pid"
+$pidFile      = "$clawshelfDir\remind-daemon.pid"
+$legacyPidFile = "$env:USERPROFILE\.openclaw\remind-daemon.pid"
 $taskName     = "ClawShelf Reminder Daemon"
 
 function Write-Step($msg) { Write-Host "`n$msg" -ForegroundColor Cyan }
@@ -78,6 +79,12 @@ Write-OK "Daemon installed to $daemonDest"
 
 # ── Step 3: Configure auto-start (Task Scheduler) ───────────────────────────
 
+# Versions before 1.1.0 ran from .openclaw; stop that daemon (its reminders move over on first start)
+if (Test-Path $legacyPidFile) {
+    Stop-Process -Id (Get-Content $legacyPidFile) -ErrorAction SilentlyContinue
+    Remove-Item $legacyPidFile -Force -ErrorAction SilentlyContinue
+}
+
 Write-Step "Step 3/4  Configure auto-start"
 
 # Remove existing task if present
@@ -134,7 +141,7 @@ if (Test-Path $pidFile) {
 }
 
 if (-not $running) {
-    Write-Warn "Could not confirm daemon status — check $openclawDir\remind-daemon.log"
+    Write-Warn "Could not confirm daemon status — check $clawshelfDir\remind-daemon.log"
 }
 
 # Send test notification
@@ -175,11 +182,11 @@ Write-Host "======================================" -ForegroundColor DarkGray
 Write-Host "  Setup complete!" -ForegroundColor Green
 Write-Host ""
 Write-Host "  Reminders written by any agent to" -ForegroundColor White
-Write-Host "  $openclawDir\reminders.json" -ForegroundColor White
+Write-Host "  $clawshelfDir\reminders.json" -ForegroundColor White
 Write-Host "  will now be delivered as Windows" -ForegroundColor White
 Write-Host "  toast notifications." -ForegroundColor White
 Write-Host ""
-Write-Host "  Daemon log:   $openclawDir\remind-daemon.log" -ForegroundColor DarkGray
+Write-Host "  Daemon log:   $clawshelfDir\remind-daemon.log" -ForegroundColor DarkGray
 Write-Host "  Stop daemon:  Stop-Process -Id (Get-Content '$pidFile')" -ForegroundColor DarkGray
 Write-Host "  Restart:      Start-ScheduledTask '$taskName'" -ForegroundColor DarkGray
 Write-Host "======================================" -ForegroundColor DarkGray

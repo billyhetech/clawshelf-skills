@@ -1,33 +1,40 @@
 ---
 name: personal-context
-description: Builds a personal profile for your OpenClaw agent so it knows your name, role, timezone, goals, and communication style. Automatically triggers a short friendly onboarding when the agent meets you for the first time. Use this skill when users say 'update my profile', 'edit my preferences', 'who am I to you', 'what do you know about me', 'personalize your responses', or whenever you detect it's a first session and no profile exists yet. Also activate when users express that the agent's tone or style feels off.
+description: Builds a personal profile so your agent knows your name, role, timezone, goals, and communication style, starting with a short friendly onboarding the first time. Use this skill when users say 'update my profile', 'edit my preferences', 'who am I to you', 'what do you know about me', 'personalize your responses', when no profile exists yet, or when users say the agent's tone or style feels off.
 license: MIT
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
   clawshelf-title: "Personal Context"
   clawshelf-summary: "Personalize every session by building a persistent profile that remembers your name, timezone, and communication style."
   clawshelf-summary-zh: "建立一份持久的个人档案，记住你的名字、时区和沟通风格，让每次对话都更贴合你。"
   clawshelf-category: "productivity"
-  clawshelf-release-notes: "Now in the public clawshelf-skills repo: install in any Agent Skills-compatible agent with `npx skills add billyhetech/clawshelf-skills --skill personal-context`."
+  clawshelf-release-notes: "Works in any Agent Skills client: the profile lives in a relative .clawshelf/ folder (an existing me.json in the agent's memory folder keeps working), and session-start loading falls back to on-demand."
 ---
 
 # Personal Context
 
 ## Purpose
 
-A new agent treats every user like a stranger. This skill runs a short onboarding conversation the very first time you meet a user, then uses the resulting profile to personalize every session that follows — the right name, the right tone, the right focus.
+A new agent treats every user like a stranger. This skill runs a short onboarding conversation the first time you meet a user, then uses the resulting profile to personalize every session that follows — the right name, the right tone, the right focus.
+
+## Rules
+
+- Ask onboarding questions one at a time, and let the user skip any of them.
+- Only change the profile after the user confirms. Never infer and auto-update.
+- Never store passwords, financial data, health records, or anything the user would expect to be confidential.
+- The profile sets defaults, not limits. If the user asks for something outside their stated focus, just help them.
 
 ## Profile Location
 
-`~/.openclaw/workspace/me.json`
+`.clawshelf/personal-context/me.json` (see Saving Data). If the agent's own memory folder already holds a `me.json` from an earlier version of this skill, keep using that file instead.
 
-This is a human-readable, user-editable file. It is separate from OpenClaw's system-managed `~/.openclaw/memory/user_profile.json` — our file contains what the user told us during onboarding; the system file tracks behavioral patterns automatically. Both can coexist without conflict.
+This is a human-readable, user-editable file. Some agents also keep a profile of their own that they update automatically; the two can coexist. When they conflict, prefer what the user told you in `me.json`.
 
 See `references/profile-schema.md` for the full field definitions and an annotated example.
 
 ## When to Activate
 
-**Automatically (first session):** If `~/.openclaw/workspace/me.json` does not exist, run onboarding before engaging with the user's first message — unless they seem to be in the middle of something urgent, in which case finish helping them first and ask at the end.
+**First meeting:** If no `me.json` exists, run onboarding before engaging with the user's first message — unless they seem to be in the middle of something urgent, in which case finish helping them first and ask at the end.
 
 **On demand:** Any of these should trigger the skill:
 - "update my profile" / "edit my preferences"
@@ -45,11 +52,11 @@ Suggested sequence:
 4. "What would you most like me to help you with?" *(e.g., coding, writing, scheduling, research)*
 5. "Any preferences on how I communicate?" *(e.g., keep it brief, I like bullet points, casual tone)*
 
-After collecting answers, save to `~/.openclaw/workspace/me.json` and confirm with a short summary:
+After collecting answers, save to `me.json` and confirm with a short summary. The details below are an example — use the user's own answers:
 
 ```
-Got it, Billy! I'll remember:
-• AI Algorithm Engineer building a startup
+Got it, Sam! I'll remember:
+• Product designer at a startup
 • Pacific Time (Los Angeles)
 • Main focus: content creation and product dev
 • Style: concise and direct
@@ -59,14 +66,14 @@ Say "update my profile" anytime to change any of this.
 
 ## Using the Profile Every Session
 
-At the start of every session, check if `~/.openclaw/workspace/me.json` exists and silently load it. Let it shape how you respond:
+When a session starts, read `me.json` if it exists and let it shape how you respond:
 
 - **Name:** Address the user by their preferred name
 - **Communication style:** Match their stated preference (brief, detailed, casual, formal, bilingual, etc.)
 - **Goals:** Prioritize suggestions that relate to what they said they care about
 - **Timezone:** Use their local time for any scheduling or time references
 
-The profile sets defaults, not limits. If the user asks for something outside their stated focus, just help them.
+Skills load only when a request matches them, so a fresh session won't read the profile by itself. After onboarding, offer once to add this line to the agent's always-on instructions (only after the user approves): "At the start of each session, load my profile with the personal-context skill." Without that line, read the profile whenever this skill is active.
 
 ## Updating the Profile
 
@@ -89,4 +96,8 @@ Don't duplicate identity facts (name, role, timezone) in `MEMORY.md` if they're 
 
 ## Privacy
 
-Don't store passwords, financial data, health records, or anything the user would expect to be confidential. If such information comes up during onboarding, skip it and explain briefly: "I'll leave that out — I don't store sensitive personal data."
+If sensitive information comes up during onboarding, skip it and explain briefly: "I'll leave that out — I don't store sensitive personal data."
+
+## Saving Data
+
+Save this skill's files under `.clawshelf/personal-context/`, a relative folder in the agent's working directory, and create it on first use. Every ClawShelf skill uses the same `.clawshelf/` folder, so they can read each other's data. If the user names a different folder, use that. If the agent can't write files, keep the state in the conversation and give the user the content to save.

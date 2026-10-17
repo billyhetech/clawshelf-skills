@@ -5,7 +5,7 @@
 Open **Terminal** (Command+Space, search "Terminal") and run:
 
 ```bash
-bash ~/.openclaw/skills/morning-brief/scripts/setup.sh
+bash "<skill-folder>/scripts/setup.sh"
 ```
 
 The script handles everything automatically. You only need to click through ~5 steps in the browser (Google authorization page, about 3 minutes).
@@ -17,18 +17,14 @@ The script handles everything automatically. You only need to click through ~5 s
 1. **Installs gogcli** (via Homebrew if available, otherwise Go or direct download)
 2. **Opens Google Cloud Console** and guides you through creating an OAuth credential file
 3. **Completes OAuth authorization in your browser** (read-only — cannot send or delete emails)
-4. **Saves config** to `~/.openclaw/.env`
+4. **Saves config** to `~/.clawshelf/morning-brief.env` (account name only, no passwords or tokens)
 5. **Verifies** that calendar and email connections succeeded
 
 ---
 
-## If the Script Path Is Wrong
+## Finding the Skill Folder
 
-```bash
-find ~/.openclaw/skills -name "setup.sh" 2>/dev/null
-```
-
-Copy the output path and run `bash <path>`.
+`<skill-folder>` is the folder this skill was installed in, the one that holds its `SKILL.md`. Ask the agent for the path if you're unsure.
 
 ---
 
@@ -36,7 +32,7 @@ Copy the output path and run `bash <path>`.
 
 ```bash
 gog auth remove you@gmail.com
-rm ~/.openclaw/.env
+rm ~/.clawshelf/morning-brief.env
 ```
 
 ---

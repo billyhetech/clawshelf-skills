@@ -46,6 +46,17 @@ npx skills update                              # 保持最新
 
 每个技能在 [clawshelf.com/skills](https://clawshelf.com/skills) 都有详情页。
 
+## 跨 Agent 兼容
+
+每个技能都要在所有 [支持 Agent Skills 的客户端](https://agentskills.io/clients) 中原样可用，不只是 OpenClaw（[规范](https://agentskills.io/specification)）：
+
+- **Frontmatter**：只用规范字段（`name`、`description`、`license`、`compatibility`、`metadata`），`name` 与文件夹同名。
+- **`compatibility`**：只写真实的环境要求（某个 CLI、Google 账号、网络、后台服务）。专为某个 Agent 设计的技能在这里写明（「Designed for OpenClaw」）。
+- **不写某个 Agent 的专属路径**：技能自己的数据放在 Agent 工作目录下的相对路径 `.clawshelf/<技能名>/`，每个存数据的技能结尾都有同样的 `## Saving Data` 段落。需要跨项目共享的文件（提醒服务、morning-brief 的账号）放在 `~/.clawshelf/`，不放进任何一个 Agent 的目录。
+- **不写某个 Agent 的专属设置或工具**：说「Agent 的常驻指令」「Agent 自带的文件搜索」，不点名某个 Agent 的文件、设置或命令。
+- **可选功能都有备选**：会话开始自动加载、定时任务、其他技能联动都是可选的，各自都能按需手动触发。
+- **`## Rules` 紧跟 `## Purpose`**：有的 Agent 只保留技能开头部分，硬性规则要放在前面。
+
 ## 仓库规则
 
 - **这里只放 ClawShelf 自己做的技能。** ClawShelf 上收录的第三方技能从原作者的仓库安装，并注明作者。

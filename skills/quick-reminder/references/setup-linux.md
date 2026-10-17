@@ -1,6 +1,6 @@
 # Quick Reminder — Linux Setup Guide
 
-The reminder daemon polls `~/.openclaw/reminders.json` and delivers desktop notifications via `notify-send` (or `wall` as fallback) when reminders are due.
+The reminder daemon polls `~/.clawshelf/reminders.json` and delivers desktop notifications via `notify-send` (or `wall` as fallback) when reminders are due.
 
 ---
 
@@ -43,8 +43,10 @@ If `notify-send` is not available, the daemon falls back to broadcasting via `wa
 
 ## Install (one command)
 
+`<skill-folder>` is the folder this skill was installed in, the one that holds its `SKILL.md`. Ask the agent for the path if you're unsure.
+
 ```bash
-bash skills/quick-reminder/scripts/setup.sh
+bash "<skill-folder>/scripts/setup.sh"
 ```
 
 The script detects your init system and configures accordingly:
@@ -60,10 +62,10 @@ The script detects your init system and configures accordingly:
 
 ```bash
 # Check daemon is running
-cat ~/.openclaw/remind-daemon.pid | xargs ps -p
+cat ~/.clawshelf/remind-daemon.pid | xargs ps -p
 
 # View logs
-tail -30 ~/.openclaw/remind-daemon.log
+tail -30 ~/.clawshelf/remind-daemon.log
 ```
 
 For systemd setups:
@@ -95,10 +97,10 @@ journalctl --user -u clawshelf-reminder -n 50
 
 ```bash
 # Stop
-kill $(cat ~/.openclaw/remind-daemon.pid)
+kill $(cat ~/.clawshelf/remind-daemon.pid)
 
 # Start
-python3 ~/.openclaw/bin/remind-daemon.py &
+python3 ~/.clawshelf/bin/remind-daemon.py &
 
 # Check status
 ps aux | grep remind-daemon
@@ -112,8 +114,8 @@ The setup script adds a startup line to `~/.bashrc` / `~/.zshrc` but not Fish co
 
 ```fish
 # ~/.config/fish/config.fish
-if not test -f ~/.openclaw/remind-daemon.pid; or not kill -0 (cat ~/.openclaw/remind-daemon.pid) 2>/dev/null
-    python3 ~/.openclaw/bin/remind-daemon.py &
+if not test -f ~/.clawshelf/remind-daemon.pid; or not kill -0 (cat ~/.clawshelf/remind-daemon.pid) 2>/dev/null
+    python3 ~/.clawshelf/bin/remind-daemon.py &
 end
 ```
 
@@ -137,13 +139,13 @@ systemctl --user daemon-reload
 ### Non-systemd
 Remove the lines added to `~/.bashrc` (look for `# ClawShelf Reminder Daemon`), then:
 ```bash
-kill $(cat ~/.openclaw/remind-daemon.pid) 2>/dev/null
+kill $(cat ~/.clawshelf/remind-daemon.pid) 2>/dev/null
 ```
 
 ### Both
 ```bash
-rm ~/.openclaw/bin/remind-daemon.py
-rm -f ~/.openclaw/remind-daemon.pid
+rm ~/.clawshelf/bin/remind-daemon.py
+rm -f ~/.clawshelf/remind-daemon.pid
 ```
 
-Your reminders JSON at `~/.openclaw/reminders.json` is preserved.
+Your reminders JSON at `~/.clawshelf/reminders.json` is preserved.

@@ -1,21 +1,24 @@
 ---
 name: openclaw-hardening
-description: Audit and harden an OpenClaw installation for common security misconfigurations. Covers non-loopback binding, exposed gateway listeners, root or Administrator execution, missing authentication, overly permissive tool policies, open DM access, plaintext API keys, and insecure file permissions. Use this skill whenever the user asks to secure OpenClaw, review a first-time setup, check whether a config is safe, audit local exposure, fix risky defaults before installing more skills, or asks "is my openclaw setup safe", "openclaw config audit", or "harden openclaw". Proactively offer to run this audit whenever the user mentions setting up or reconfiguring OpenClaw.
-compatibility: No additional binaries required. Uses only shell tools already available on the host (id, ps, ss, netstat, stat, whoami, Get-NetTCPConnection, etc.). Requires read access to local config files and process state.
+description: "Audit and harden an OpenClaw installation for common security misconfigurations: exposed gateway listeners, missing authentication, root or Administrator execution, permissive tool and DM policies, plaintext API keys, and insecure file permissions. Use it when the user asks \"is my openclaw setup safe\", \"openclaw config audit\", \"harden openclaw\", wants a first-time setup reviewed, or is about to install more skills; offer it whenever they set up or reconfigure OpenClaw."
+license: MIT
+compatibility: "Designed for OpenClaw (openclaw.ai); it can run from any agent on the machine where OpenClaw is installed. Uses only built-in shell tools (id, ps, ss or lsof, netstat, stat, whoami, Get-NetTCPConnection) and needs read access to OpenClaw's config files and process state."
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
   clawshelf-title: "OpenClaw Hardening"
   clawshelf-summary: "Harden your OpenClaw setup by auditing security misconfigurations like exposed listeners, missing auth, and insecure permissions before installing additional skills."
   clawshelf-summary-zh: "在安装更多技能之前，排查 OpenClaw 的安全隐患：暴露的端口、缺失的鉴权和不安全的权限。"
   clawshelf-category: "security"
-  clawshelf-release-notes: "Now in the public clawshelf-skills repo: install in any Agent Skills-compatible agent with `npx skills add billyhetech/clawshelf-skills --skill openclaw-hardening`."
+  clawshelf-release-notes: "Declares that it targets OpenClaw (it can run from any agent), the rules sit at the top, and the description is shorter so agents don't truncate it."
 ---
 
 # OpenClaw Hardening
 
-Audit the local OpenClaw setup without making assumptions about the host OS.
+## Purpose
 
-## Guiding Principles
+Audit the local OpenClaw setup without making assumptions about the host OS, then give the user a short report card and the single highest-value fix.
+
+## Rules
 
 Before suggesting or applying any change, explain the risk in plain terms — users can only make informed decisions when they understand what they're accepting. Changes to files, permissions, users, or startup commands require explicit user confirmation, because an agent that acts without consent removes the user's ability to course-correct.
 
@@ -31,7 +34,7 @@ Remind the user to restart OpenClaw after any accepted config change, since Open
 
 Identify the platform before choosing commands.
 
-- On Linux or macOS, prefer native shell tools such as `id`, `ps`, `ss`, `netstat`, `stat`, and `ls`.
+- On Linux or macOS, prefer native shell tools such as `id`, `ps`, `ss` (Linux) or `lsof` (macOS), `netstat`, `stat`, and `ls`.
 - On Windows, prefer PowerShell equivalents such as `whoami`, `Get-Process`, `Get-NetTCPConnection`, `Get-Acl`, and `Select-String`.
 
 If a command is unavailable, switch to an equivalent rather than failing the whole audit.

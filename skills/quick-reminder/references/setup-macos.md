@@ -23,18 +23,15 @@ brew install python3
 
 ## Install (one command)
 
-```bash
-bash skills/quick-reminder/scripts/setup.sh
-```
+`<skill-folder>` is the folder this skill was installed in, the one that holds its `SKILL.md`. Ask the agent for the path if you're unsure.
 
-Or from within the scripts directory:
 ```bash
-cd skills/quick-reminder/scripts && bash setup.sh
+bash "<skill-folder>/scripts/setup.sh"
 ```
 
 The script will:
 1. Verify Python 3 is installed
-2. Copy the daemon to `~/.openclaw/bin/remind-daemon.py`
+2. Copy the daemon to `~/.clawshelf/bin/remind-daemon.py`
 3. Register a launchd agent (`~/Library/LaunchAgents/com.clawshelf.reminder.plist`) that starts at login
 4. Load the agent immediately
 5. Send a test notification to confirm everything works
@@ -48,10 +45,10 @@ You should see a macOS notification: "Reminder daemon is running!"
 To check manually:
 ```bash
 # Is the daemon running?
-cat ~/.openclaw/remind-daemon.pid | xargs ps -p
+cat ~/.clawshelf/remind-daemon.pid | xargs ps -p
 
 # View logs
-tail -30 ~/.openclaw/remind-daemon.log
+tail -30 ~/.clawshelf/remind-daemon.log
 
 # Check launchd status
 launchctl list | grep clawshelf
@@ -88,7 +85,7 @@ launchctl load ~/Library/LaunchAgents/com.clawshelf.reminder.plist
 
 3. **Check the log:**
    ```bash
-   tail -50 ~/.openclaw/remind-daemon.log
+   tail -50 ~/.clawshelf/remind-daemon.log
    ```
 
 ---
@@ -101,8 +98,8 @@ launchctl unload ~/Library/LaunchAgents/com.clawshelf.reminder.plist
 rm ~/Library/LaunchAgents/com.clawshelf.reminder.plist
 
 # Remove daemon
-rm ~/.openclaw/bin/remind-daemon.py
-rm -f ~/.openclaw/remind-daemon.pid
+rm ~/.clawshelf/bin/remind-daemon.py
+rm -f ~/.clawshelf/remind-daemon.pid
 ```
 
-Your reminders JSON at `~/.openclaw/reminders.json` is preserved.
+Your reminders JSON at `~/.clawshelf/reminders.json` is preserved.

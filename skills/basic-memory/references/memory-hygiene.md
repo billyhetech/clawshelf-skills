@@ -4,15 +4,17 @@ Rules for keeping `MEMORY.md` and the daily memory files clean and useful over t
 
 ---
 
-## File Locations (Canonical)
+## File Locations
+
+Paths are relative to the memory folder chosen in SKILL.md (the agent's own memory folder, or `.clawshelf/basic-memory/`).
 
 | File | Path | Purpose |
 |---|---|---|
-| Long-term memory | `~/.openclaw/workspace/MEMORY.md` | Facts, preferences, action items, learned patterns |
-| Daily log | `~/.openclaw/workspace/memory/YYYY-MM-DD.md` | Running context for each day |
-| Archive | `~/.openclaw/workspace/memory/archive/` | Rolled-up older logs |
+| Long-term memory | `MEMORY.md` | Facts, preferences, action items, learned patterns |
+| Daily log | `memory/YYYY-MM-DD.md` | Running context for each day |
+| Archive | `memory/archive/` | Rolled-up older logs |
 
-> `~/.openclaw/memory/{agentId}.sqlite` is the system's search index — never write to it directly. It rebuilds automatically from the workspace files.
+> If the agent keeps a search index or database next to its memory files, never write to it directly. Only the Markdown files are yours to read and write.
 
 ---
 
@@ -23,7 +25,7 @@ Rules for keeping `MEMORY.md` and the daily memory files clean and useful over t
 | `MEMORY.md` — any single section | 50 entries | Deduplicate; newer entry replaces older one on same topic |
 | `MEMORY.md` — total | 200 entries | Archive the `## Learned` section into a dated file |
 | Daily log file | 80 entries | Stop adding to current day; new entries go to tomorrow's file |
-| Total workspace | 1 MB | Warn user: "Memory is getting large — consider archiving old logs." |
+| Total memory folder | 1 MB | Warn user: "Memory is getting large — consider archiving old logs." |
 
 ---
 
@@ -96,7 +98,7 @@ If the user asks you to save such information, decline: "I can't store that kind
 When the user asks "show all memories" or "how much do you remember?":
 
 ```
-Memory summary (workspace):
+Memory summary:
 • MEMORY.md — 12 facts, 8 preferences, 5 open tasks, 3 learned patterns
 • Daily logs — 14 files (today + yesterday loaded this session)
 • Archive — 2 monthly rollups

@@ -5,8 +5,8 @@
 $ErrorActionPreference = "Stop"
 $gogDir    = "$env:USERPROFILE\bin"
 $gogExe    = "$gogDir\gog.exe"
-$configDir = "$env:USERPROFILE\.openclaw\clawshelf"
-$envFile   = "$configDir\.env"
+$configDir = "$env:USERPROFILE\.clawshelf"
+$envFile   = "$configDir\morning-brief.env"
 
 function Write-Step($msg) { Write-Host "`n$msg" -ForegroundColor Cyan }
 function Write-OK($msg)   { Write-Host "  v $msg" -ForegroundColor Green }
@@ -137,7 +137,7 @@ Write-Host ""
 Write-Host "======================================" -ForegroundColor DarkGray
 Write-Host "  Setup complete!" -ForegroundColor Green
 Write-Host ""
-Write-Host "  Say 'good morning' to Claude to get your first real brief." -ForegroundColor White
+Write-Host "  Say 'good morning' to your agent to get your first real brief." -ForegroundColor White
 Write-Host ""
 Write-Host "  To disconnect:   gog auth remove $gmail" -ForegroundColor DarkGray
 Write-Host "  To reset config: del `"$envFile`"" -ForegroundColor DarkGray

@@ -24,14 +24,17 @@ Or download from https://www.python.org/downloads/ (check "Add Python to PATH" d
 
 ## Install (one command)
 
-Open PowerShell in the `skills\quick-reminder\scripts\` directory and run:
+`<skill-folder>` is the folder this skill was installed in, the one that holds its `SKILL.md`. Ask the agent for the path if you're unsure.
+
+Open PowerShell and run:
 ```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; .\setup.ps1
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+& "<skill-folder>\scripts\setup.ps1"
 ```
 
 The script will:
 1. Verify Python is installed
-2. Copy the daemon to `%USERPROFILE%\.openclaw\bin\`
+2. Copy the daemon to `%USERPROFILE%\.clawshelf\bin\`
 3. Register a Task Scheduler entry that starts the daemon at every login
 4. Start the daemon immediately
 5. Fire a test toast notification to confirm everything works
@@ -45,11 +48,11 @@ After setup, you should see a Windows toast notification in the bottom-right cor
 To manually check the daemon:
 ```powershell
 # Is it running?
-$pid = Get-Content "$env:USERPROFILE\.openclaw\remind-daemon.pid"
+$pid = Get-Content "$env:USERPROFILE\.clawshelf\remind-daemon.pid"
 Get-Process -Id $pid
 
 # View recent logs
-Get-Content "$env:USERPROFILE\.openclaw\remind-daemon.log" -Tail 20
+Get-Content "$env:USERPROFILE\.clawshelf\remind-daemon.log" -Tail 20
 ```
 
 ---
@@ -58,7 +61,7 @@ Get-Content "$env:USERPROFILE\.openclaw\remind-daemon.log" -Tail 20
 
 **Stop:**
 ```powershell
-Stop-Process -Id (Get-Content "$env:USERPROFILE\.openclaw\remind-daemon.pid")
+Stop-Process -Id (Get-Content "$env:USERPROFILE\.clawshelf\remind-daemon.pid")
 ```
 
 **Restart:**
@@ -83,7 +86,7 @@ Get-ScheduledTask "ClawShelf Reminder Daemon"
 
 3. **Check the log for errors:**
    ```powershell
-   Get-Content "$env:USERPROFILE\.openclaw\remind-daemon.log" -Tail 50
+   Get-Content "$env:USERPROFILE\.clawshelf\remind-daemon.log" -Tail 50
    ```
 
 ---
@@ -96,8 +99,8 @@ Stop-ScheduledTask "ClawShelf Reminder Daemon" -ErrorAction SilentlyContinue
 Unregister-ScheduledTask "ClawShelf Reminder Daemon" -Confirm:$false
 
 # Remove daemon files
-Remove-Item "$env:USERPROFILE\.openclaw\bin\remind-daemon.py" -Force
-Remove-Item "$env:USERPROFILE\.openclaw\remind-daemon.pid" -Force -ErrorAction SilentlyContinue
+Remove-Item "$env:USERPROFILE\.clawshelf\bin\remind-daemon.py" -Force
+Remove-Item "$env:USERPROFILE\.clawshelf\remind-daemon.pid" -Force -ErrorAction SilentlyContinue
 ```
 
-Your reminders JSON at `%USERPROFILE%\.openclaw\reminders.json` is preserved.
+Your reminders JSON at `%USERPROFILE%\.clawshelf\reminders.json` is preserved.

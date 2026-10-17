@@ -15,7 +15,7 @@
       ],
       "displayName": "Memory Starter Kit",
       "description": "Equip your agent with persistent memory and personal context to maintain continuity and recognize user preferences across every session.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "category": "productivity",
       "license": "MIT",
       "homepage": "https://clawshelf.com/skill/clawshelf-team-memory-starter-kit",
@@ -23,7 +23,7 @@
         "clawshelf": {
           "kind": "pack",
           "summaryZh": "为 Agent 配齐持久记忆和个人档案，跨对话保持连贯，记住你的偏好。",
-          "releaseNotes": "Packs are now Claude Code plugins too: /plugin marketplace add billyhetech/clawshelf-skills."
+          "releaseNotes": "Works in any Agent Skills client: memory and the profile use the agent's own memory folder when it has one, otherwise a relative .clawshelf/ folder."
         }
       }
     },
@@ -37,7 +37,7 @@
       ],
       "displayName": "Security First Kit",
       "description": "Secure your agent setup by hardening configurations, monitoring agent behavior, and vetting every skill before installation.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "category": "security",
       "license": "MIT",
       "homepage": "https://clawshelf.com/skill/clawshelf-team-security-first-kit",
@@ -45,7 +45,7 @@
         "clawshelf": {
           "kind": "pack",
           "summaryZh": "加固安装配置、监控 Agent 行为、安装前审查每个技能，一套装齐。",
-          "releaseNotes": "Moved to the public clawshelf-skills repo; installs in any Agent Skills-compatible agent."
+          "releaseNotes": "Permission Guard and Skill Scanner now work in any Agent Skills client; OpenClaw Hardening declares that it targets OpenClaw."
         }
       }
     },
@@ -59,7 +59,7 @@
       ],
       "displayName": "Day One Kit",
       "description": "Start every day organized: a morning briefing, natural-language reminders, and instant summaries of anything you read or watch.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "productivity",
       "license": "MIT",
       "homepage": "https://clawshelf.com/skill/clawshelf-team-day-one-kit",
@@ -67,7 +67,7 @@
         "clawshelf": {
           "kind": "pack",
           "summaryZh": "从第一天就井井有条：晨间简报、自然语言提醒，读到看到的内容一键摘要。",
-          "releaseNotes": "First release in the public clawshelf-skills repo."
+          "releaseNotes": "Works in any Agent Skills client: data lives in .clawshelf/, reminders in ~/.clawshelf/ (re-run setup once), and timed delivery falls back to on-demand."
         }
       }
     },
@@ -79,7 +79,7 @@
       ],
       "displayName": "Basic Memory",
       "description": "Equip your agent with persistent memory by automatically saving facts, preferences, and decisions across every conversation session.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "category": "productivity",
       "license": "MIT",
       "homepage": "https://clawshelf.com/skill/clawshelf-team-basic-memory",
@@ -97,8 +97,9 @@
       ],
       "displayName": "Morning Brief",
       "description": "A concise, prioritized daily briefing: weather, today's schedule, urgent email highlights, and a suggested action plan.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "productivity",
+      "license": "MIT",
       "homepage": "https://clawshelf.com/skill/clawshelf-team-morning-brief",
       "metadata": {
         "clawshelf": {
@@ -114,8 +115,9 @@
       ],
       "displayName": "OpenClaw Hardening",
       "description": "Harden your OpenClaw setup by auditing security misconfigurations like exposed listeners, missing auth, and insecure permissions before installing additional skills.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "category": "security",
+      "license": "MIT",
       "homepage": "https://clawshelf.com/skill/clawshelf-team-openclaw-hardening",
       "metadata": {
         "clawshelf": {
@@ -130,9 +132,10 @@
         "./skills/permission-guard"
       ],
       "displayName": "Permission Guard",
-      "description": "Secure your OpenClaw agent by monitoring skill behavior, detecting unauthorized access, and generating detailed permission audit reports.",
-      "version": "1.1.0",
+      "description": "Secure your agent by monitoring skill behavior, detecting unauthorized access, and generating detailed permission audit reports.",
+      "version": "1.2.0",
       "category": "security",
+      "license": "MIT",
       "homepage": "https://clawshelf.com/skill/clawshelf-team-permission-guard",
       "metadata": {
         "clawshelf": {
@@ -148,7 +151,7 @@
       ],
       "displayName": "Personal Context",
       "description": "Personalize every session by building a persistent profile that remembers your name, timezone, and communication style.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "category": "productivity",
       "license": "MIT",
       "homepage": "https://clawshelf.com/skill/clawshelf-team-personal-context",
@@ -166,8 +169,9 @@
       ],
       "displayName": "Quick Reminder",
       "description": "Set, manage, and receive reminders in plain natural language.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "productivity",
+      "license": "MIT",
       "homepage": "https://clawshelf.com/skill/clawshelf-team-quick-reminder",
       "metadata": {
         "clawshelf": {
@@ -183,8 +187,9 @@
       ],
       "displayName": "Skill Scanner",
       "description": "Protect your agent by scanning skills for malicious patterns, prompt injections, and permission abuse before you install them.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "category": "security",
+      "license": "MIT",
       "homepage": "https://clawshelf.com/skill/clawshelf-team-skill-scanner",
       "metadata": {
         "clawshelf": {
@@ -200,8 +205,9 @@
       ],
       "displayName": "Smart Summarizer",
       "description": "Transform long articles, videos, and PDFs into concise digests with TL;DRs and actionable insights in seconds.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "category": "productivity",
+      "license": "MIT",
       "homepage": "https://clawshelf.com/skill/clawshelf-team-smart-summarizer",
       "metadata": {
         "clawshelf": {

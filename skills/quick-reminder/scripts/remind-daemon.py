@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # ClawShelf Remind Daemon — cross-platform reminder delivery
-# Polls ~/.openclaw/reminders.json every 30s and fires OS notifications.
+# Polls ~/.clawshelf/reminders.json every 30s and fires OS notifications.
 # No pip installs required — uses only stdlib + native OS notification tools.
 
 import json
@@ -14,10 +14,12 @@ from pathlib import Path
 
 # ── Paths ────────────────────────────────────────────────────────────────────
 
-OPENCLAW_DIR = Path.home() / ".openclaw"
-REMINDERS_FILE = OPENCLAW_DIR / "reminders.json"
-PID_FILE = OPENCLAW_DIR / "remind-daemon.pid"
-LOG_FILE = OPENCLAW_DIR / "remind-daemon.log"
+CLAWSHELF_DIR = Path.home() / ".clawshelf"
+REMINDERS_FILE = CLAWSHELF_DIR / "reminders.json"
+PID_FILE = CLAWSHELF_DIR / "remind-daemon.pid"
+LOG_FILE = CLAWSHELF_DIR / "remind-daemon.log"
+# Versions before 1.1.0 kept reminders here; moved over once on startup
+LEGACY_REMINDERS_FILE = Path.home() / ".openclaw" / "reminders.json"
 POLL_INTERVAL = 30  # seconds
 LOG_MAX_LINES = 500
 
@@ -153,10 +155,26 @@ def load_reminders() -> list:
         return []
 
 def save_reminders(reminders: list):
-    OPENCLAW_DIR.mkdir(parents=True, exist_ok=True)
+    CLAWSHELF_DIR.mkdir(parents=True, exist_ok=True)
     tmp = REMINDERS_FILE.with_suffix(".tmp")
     tmp.write_text(json.dumps(reminders, indent=2, ensure_ascii=False), encoding="utf-8")
     tmp.replace(REMINDERS_FILE)
+
+def migrate_legacy_reminders():
+    """Move reminders from the pre-1.1.0 location. The old file is renamed so
+    an old daemon that is still running can't fire them a second time."""
+    if REMINDERS_FILE.exists() or not LEGACY_REMINDERS_FILE.exists():
+        return
+    try:
+        REMINDERS_FILE.write_text(
+            LEGACY_REMINDERS_FILE.read_text(encoding="utf-8"), encoding="utf-8"
+        )
+        LEGACY_REMINDERS_FILE.rename(
+            LEGACY_REMINDERS_FILE.with_name("reminders.json.migrated")
+        )
+        log(f"Moved reminders from {LEGACY_REMINDERS_FILE} to {REMINDERS_FILE}")
+    except OSError as e:
+        log(f"Could not move legacy reminders: {e}")
 
 def parse_dt(s: str) -> datetime:
     """Parse ISO 8601 datetime string, always returning an aware UTC datetime."""
@@ -253,9 +271,10 @@ def main():
         print("ClawShelf reminder daemon is already running. Exiting.")
         sys.exit(0)
 
-    OPENCLAW_DIR.mkdir(parents=True, exist_ok=True)
+    CLAWSHELF_DIR.mkdir(parents=True, exist_ok=True)
     write_pid()
     log("ClawShelf reminder daemon started")
+    migrate_legacy_reminders()
 
     try:
         while True:

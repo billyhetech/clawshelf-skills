@@ -5,8 +5,8 @@
 set -e
 
 GOG_DIR="$HOME/.local/bin"
-CONFIG_DIR="$HOME/.openclaw/clawshelf"
-ENV_FILE="$CONFIG_DIR/.env"
+CONFIG_DIR="$HOME/.clawshelf"
+ENV_FILE="$CONFIG_DIR/morning-brief.env"
 
 CYAN='\033[0;36m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
 
@@ -156,7 +156,7 @@ echo ""
 echo "======================================"
 echo -e "  ${GREEN}Setup complete!${NC}"
 echo ""
-echo "  Say 'good morning' to Claude to get your first real brief."
+echo "  Say 'good morning' to your agent to get your first real brief."
 echo ""
 echo "  To disconnect:   gog auth remove $GMAIL"
 echo "  To reset config: rm \"$ENV_FILE\""
