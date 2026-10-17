@@ -12,7 +12,7 @@
  * Used by this public repo (free skills) and, through the reusable workflow,
  * by the private clawshelf-skills-pro repo (PRICING=premium).
  *
- * Env: INGEST_SECRET, STORAGE_ENDPOINT, STORAGE_ACCESS_KEY_ID,
+ * Env: PUBLISH_SECRET, STORAGE_ENDPOINT, STORAGE_ACCESS_KEY_ID,
  *      STORAGE_SECRET_ACCESS_KEY, STORAGE_BUCKET_NAME, STORAGE_REGION,
  *      PRICING=free|premium, SITE_URL, PUBLIC_REPO, CHANGED_FILES (newline list,
  *      empty = publish everything), RELEASE_NOTES (default release notes),
@@ -195,7 +195,7 @@ if (DRY_RUN) {
   process.exit(0);
 }
 
-for (const name of ['INGEST_SECRET', 'STORAGE_ENDPOINT', 'STORAGE_ACCESS_KEY_ID', 'STORAGE_SECRET_ACCESS_KEY', 'STORAGE_BUCKET_NAME']) {
+for (const name of ['PUBLISH_SECRET', 'STORAGE_ENDPOINT', 'STORAGE_ACCESS_KEY_ID', 'STORAGE_SECRET_ACCESS_KEY', 'STORAGE_BUCKET_NAME']) {
   if (!env[name]) {
     console.error(`Missing ${name}`);
     process.exit(1);
@@ -218,7 +218,7 @@ for (const { key, buffer } of uploads) {
 const response = await fetch(`${SITE_URL}/api/skills/ingest`, {
   method: 'POST',
   headers: {
-    authorization: `Bearer ${env.INGEST_SECRET}`,
+    authorization: `Bearer ${env.PUBLISH_SECRET}`,
     'content-type': 'application/json',
   },
   body: JSON.stringify({ items }),
