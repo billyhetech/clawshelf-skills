@@ -1,0 +1,90 @@
+name: Publish to clawshelf.com
+
+# Free skills publish from this repo on every push to main. The private
+# clawshelf-skills-pro repo calls this same workflow with pricing: premium.
+on:
+  push:
+    branches: [main]
+    paths: ['skills/**', 'packs/**']
+  workflow_dispatch:
+    inputs:
+      all:
+        description: Republish every skill, not just the changed ones
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      pricing:
+        type: string
+        default: premium
+    secrets:
+      INGEST_SECRET:
+        required: true
+      STORAGE_ENDPOINT:
+        required: true
+      STORAGE_ACCESS_KEY_ID:
+        required: true
+      STORAGE_SECRET_ACCESS_KEY:
+        required: true
+      STORAGE_BUCKET_NAME:
+        required: true
+      STORAGE_REGION:
+        required: false
+
+concurrency:
+  group: publish-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      # The skills to publish: this repo, or the calling (private) repo
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # The publisher itself always comes from the public repo
+      - uses: actions/checkout@v4
+        with:
+          repository: billyhetech/clawshelf-skills
+          path: .publisher
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --prefix .publisher --no-audit --no-fund
+      - name: Changed files
+        id: changed
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.all }}" = "true" ]; then
+            echo "files=" >> "$GITHUB_OUTPUT"
+          elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            {
+              echo "files<<EOF"
+              git diff --name-only "${{ github.event.before }}" "${{ github.sha }}"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "files=" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Skip when secrets are not configured yet
+        id: guard
+        env:
+          INGEST_SECRET: ${{ secrets.INGEST_SECRET }}
+        run: |
+          if [ -z "$INGEST_SECRET" ]; then
+            echo "INGEST_SECRET is not set — skipping publish." >> "$GITHUB_STEP_SUMMARY"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Publish
+        if: steps.guard.outputs.skip != 'true'
+        env:
+          PRICING: ${{ inputs.pricing || 'free' }}
+          CHANGED_FILES: ${{ steps.changed.outputs.files }}
+          RELEASE_NOTES: ${{ github.event.head_commit.message }}
+          INGEST_SECRET: ${{ secrets.INGEST_SECRET }}
+          STORAGE_ENDPOINT: ${{ secrets.STORAGE_ENDPOINT }}
+          STORAGE_ACCESS_KEY_ID: ${{ secrets.STORAGE_ACCESS_KEY_ID }}
+          STORAGE_SECRET_ACCESS_KEY: ${{ secrets.STORAGE_SECRET_ACCESS_KEY }}
+          STORAGE_BUCKET_NAME: ${{ secrets.STORAGE_BUCKET_NAME }}
+          STORAGE_REGION: ${{ secrets.STORAGE_REGION }}
+        run: node .publisher/scripts/publish.mjs

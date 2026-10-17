@@ -2,6 +2,14 @@
 name: basic-memory
 description: Gives your OpenClaw agent persistent memory across conversations by organizing entries in the native MEMORY.md and daily memory files. Automatically loads saved context at session start and saves important facts, decisions, and preferences during conversation. Use this skill whenever users say 'remember this', 'save this', 'don't forget', 'note that', 'what do you remember', 'forget [topic]', or when you detect they've shared something worth keeping — even if they don't explicitly ask. Also activate automatically at the start of every new session to load prior context.
 license: MIT
+metadata:
+  clawshelf:
+    title: Basic Memory
+    summary: Equip your agent with persistent memory by automatically saving facts, preferences, and decisions across every conversation session.
+    summary_zh: 让 Agent 拥有持久记忆，自动保存每次对话中的事实、偏好和决定。
+    category: productivity
+    version: 1.1.0
+    release_notes: Moved to the public clawshelf-skills repo — install in any agent with `npx skills add billyhetech/clawshelf-skills --skill basic-memory`.
 ---
 
 # Basic Memory

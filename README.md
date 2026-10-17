@@ -33,6 +33,23 @@ Prefer to browse first? Every skill has a page with examples on [clawshelf.com/s
 - Merging to `main` publishes the update: `npx skills update` picks it up, and clawshelf.com refreshes its catalog.
 - Premium (Pro) skills are not in this repo; they install from clawshelf.com with an API key.
 
+## Publishing (maintainers)
+
+Every push to `main` that touches `skills/` or `packs/` runs `.github/workflows/publish.yml`. It zips each changed skill, uploads it to ClawShelf's storage, and updates its page on clawshelf.com. Bump `version` to add a changelog entry. Optional fields in `SKILL.md` frontmatter:
+
+```yaml
+metadata:
+  clawshelf:
+    title: Basic Memory          # display name (default: from the folder name)
+    summary: One sentence …      # ≤ 300 chars (default: first sentence of description)
+    summary_zh: 一句话中文简介      # ≤ 200 chars
+    category: productivity       # a clawshelf.com category
+    version: 1.1.0               # bump to record a release
+    release_notes: What changed  # default: the commit message
+```
+
+Packs live in `packs/<name>/PACK.md` with a `skills:` list.
+
 ## License
 
 MIT — see [LICENSE](./LICENSE).

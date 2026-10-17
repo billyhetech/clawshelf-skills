@@ -33,6 +33,23 @@ npx skills update
 - 合并到 `main` 即发布：`npx skills update` 会拿到更新，clawshelf.com 也会同步刷新。
 - 付费（Pro）技能不在这个仓库，通过 clawshelf.com 用 API Key 安装。
 
+## 发布（维护者）
+
+每次推送到 `main` 且改动了 `skills/` 或 `packs/`，`.github/workflows/publish.yml` 会自动把有改动的技能打包、上传到 ClawShelf 的存储，并更新 clawshelf.com 上的页面。修改 `version` 会新增一条更新日志。`SKILL.md` frontmatter 的可选字段：
+
+```yaml
+metadata:
+  clawshelf:
+    title: Basic Memory          # 显示名称（默认取文件夹名）
+    summary: One sentence …      # ≤ 300 字符（默认取 description 第一句）
+    summary_zh: 一句话中文简介      # ≤ 200 字符
+    category: productivity       # clawshelf.com 的分类
+    version: 1.1.0               # 修改即记录一次发布
+    release_notes: What changed  # 默认使用提交信息
+```
+
+套装放在 `packs/<name>/PACK.md`，用 `skills:` 列出包含的技能。
+
 ## 许可
 
 MIT，见 [LICENSE](./LICENSE)。

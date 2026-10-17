@@ -2,6 +2,14 @@
 name: personal-context
 description: Builds a personal profile for your OpenClaw agent so it knows your name, role, timezone, goals, and communication style. Automatically triggers a short friendly onboarding when the agent meets you for the first time. Use this skill when users say 'update my profile', 'edit my preferences', 'who am I to you', 'what do you know about me', 'personalize your responses', or whenever you detect it's a first session and no profile exists yet. Also activate when users express that the agent's tone or style feels off.
 license: MIT
+metadata:
+  clawshelf:
+    title: Personal Context
+    summary: Personalize every session by building a persistent profile that remembers your name, timezone, and communication style.
+    summary_zh: 建立一份持久的个人档案，记住你的名字、时区和沟通风格，让每次对话都更贴合你。
+    category: productivity
+    version: 1.1.0
+    release_notes: Moved to the public clawshelf-skills repo — install in any agent with `npx skills add billyhetech/clawshelf-skills --skill personal-context`.
 ---
 
 # Personal Context
