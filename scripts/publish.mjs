@@ -2,15 +2,20 @@
 /**
  * Publish ClawShelf skills to clawshelf.com.
  *
- * For every changed skills/<name>/ (and every packs/<name>/ that includes it):
- *   1. zip the folder deterministically and upload it to the private R2 bucket
- *      under a content-hashed key (skills/<32 hex>.zip)
+ * For every changed skills/<name>/ (and every pack in .claude-plugin/marketplace.json
+ * that includes it):
+ *   1. zip it deterministically and upload it to the private R2 bucket under a
+ *      content-hashed key (skills/<32 hex>.zip) — unchanged content keeps its key
  *   2. POST /api/skills/ingest { action: "publish" } — the site updates the
  *      catalog and writes a changelog entry when the version changes
  *   3. delete the R2 objects the site reports as `replaced`
  *
  * Used by this public repo (free skills) and, through the reusable workflow,
  * by the private clawshelf-skills-pro repo (PRICING=premium).
+ *
+ * Pricing (premium repo only): SKILL.md `metadata.clawshelf-price` / pack
+ * `metadata.clawshelf.price` = "pro" (default) → Pro/Lifetime members only, or a
+ * number in USD → also sold on its own.
  *
  * Env: PUBLISH_SECRET, STORAGE_ENDPOINT, STORAGE_ACCESS_KEY_ID,
  *      STORAGE_SECRET_ACCESS_KEY, STORAGE_BUCKET_NAME, STORAGE_REGION,
@@ -19,11 +24,11 @@
  *      DRY_RUN=1 to print payloads without uploading.
  */
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import JSZip from 'jszip';
 import { s3mini } from 's3mini';
-import { parse as parseYaml } from 'yaml';
+import { listPacks, listSkills, readMarketplace, readSkill } from './skill-meta.mjs';
 
 const env = process.env;
 const PRICING = env.PRICING === 'premium' ? 'premium' : 'free';
@@ -43,33 +48,27 @@ function walk(dir) {
     });
 }
 
-function readFrontmatter(file) {
-  const text = readFileSync(file, 'utf8');
-  const match = text.match(/^---\n([\s\S]*?)\n---/);
-  if (!match) throw new Error(`${file}: missing frontmatter`);
-  return { data: parseYaml(match[1]) ?? {}, text };
-}
-
 function titleCase(name) {
-  return name
-    .split('-')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
+  return name.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
 function firstSentence(text, max) {
-  const sentence = text.split(/(?<=[.!?])\s/)[0];
-  return (sentence.length <= max ? sentence : `${text.slice(0, max - 1)}…`).trim();
+  const sentence = String(text).split(/(?<=[.!?])\s/)[0];
+  return (sentence.length <= max ? sentence : `${String(text).slice(0, max - 1)}…`).trim();
 }
 
-/** Deterministic ZIP: sorted entries, fixed timestamps → same bytes for same content. */
+/**
+ * Deterministic ZIP: sorted entries, fixed timestamps and no implicit folder
+ * entries (JSZip would stamp those with the current time) → same bytes for the
+ * same content, so an unchanged skill keeps its R2 key.
+ */
 async function zipFolders(folders) {
   const zip = new JSZip();
   const files = [];
   for (const { dir, prefix } of folders) {
     for (const file of walk(dir)) {
       const path = join(prefix, relative(dir, file));
-      zip.file(path, readFileSync(file), { date: FIXED_DATE });
+      zip.file(path, readFileSync(file), { date: FIXED_DATE, createFolders: false });
       files.push(path);
     }
   }
@@ -77,6 +76,7 @@ async function zipFolders(folders) {
     type: 'nodebuffer',
     compression: 'DEFLATE',
     compressionOptions: { level: 9 },
+    platform: 'UNIX',
   });
   return { buffer, files };
 }
@@ -90,59 +90,53 @@ function r2Key(commandName, buffer) {
   return `skills/${id}.zip`;
 }
 
-function meta(data) {
-  return data?.metadata?.clawshelf ?? {};
-}
-
-function basePayload({ name, data, text, kind }) {
-  const m = meta(data);
-  const description = String(data.description ?? '').trim();
-  const isFree = PRICING === 'free' && m.price === undefined;
+/** Free repo → free. Premium repo → "pro" (members only) unless a USD price is set. */
+function pricing(price) {
+  if (PRICING === 'free') return { isFree: true, priceCents: 0 };
+  const usd = Number(price);
   return {
-    action: 'publish',
-    slug: m.slug ?? `${SLUG_PREFIX}${name}`,
-    type: kind,
-    title: m.title ?? titleCase(name),
-    summary: m.summary ?? firstSentence(description, 300),
-    summaryZh: m.summary_zh ?? null,
-    description: description.slice(0, 4000),
-    category: m.category ?? 'other',
-    outputType: m.output_type ?? null,
-    agents: m.agents ?? AGENTS,
-    isFree,
-    priceCents: isFree ? 0 : Math.round(Number(m.price ?? 0) * 100),
-    version: String(m.version ?? '1.0.0'),
-    releaseNotes: m.release_notes ?? env.RELEASE_NOTES ?? null,
-    commandName: name,
-    previewSkillMd: text.slice(0, 20_000),
-    license: data.license ?? m.license ?? null,
+    isFree: false,
+    priceCents: price !== undefined && price !== 'pro' && Number.isFinite(usd) ? Math.round(usd * 100) : 0,
   };
 }
 
-const skillDirs = existsSync('skills')
-  ? readdirSync('skills').filter((n) => statSync(join('skills', n)).isDirectory())
-  : [];
-const packDirs = existsSync('packs')
-  ? readdirSync('packs').filter((n) => statSync(join('packs', n)).isDirectory())
-  : [];
+const marketplace = readMarketplace();
+const skillNames = listSkills();
+const packs = listPacks(marketplace);
 
 const changed = (env.CHANGED_FILES ?? '').split('\n').map((s) => s.trim()).filter(Boolean);
 const everything = changed.length === 0;
 const touched = (prefix) => everything || changed.some((f) => f.startsWith(prefix));
+const marketplaceTouched = touched('.claude-plugin/');
 
 const items = [];
 const uploads = [];
 
-for (const name of skillDirs) {
+for (const name of skillNames) {
   if (!touched(`skills/${name}/`)) continue;
+  const s = readSkill(name);
   const dir = join('skills', name);
-  const { data, text } = readFrontmatter(join(dir, 'SKILL.md'));
   const { buffer, files } = await zipFolders([{ dir, prefix: name }]);
   const key = r2Key(name, buffer);
-  const payload = basePayload({ name, data, text, kind: 'skill' });
-  const isPublic = PRICING === 'free' && payload.isFree;
+  const price = pricing(s.price);
+  const isPublic = PRICING === 'free';
   items.push({
-    ...payload,
+    action: 'publish',
+    slug: `${SLUG_PREFIX}${name}`,
+    type: 'skill',
+    title: s.title ?? titleCase(name),
+    summary: s.summary ?? firstSentence(s.data.description ?? '', 300),
+    summaryZh: s.summaryZh ?? null,
+    description: String(s.data.description ?? '').trim().slice(0, 4000),
+    category: s.category ?? 'other',
+    outputType: s.outputType ?? null,
+    agents: AGENTS,
+    ...price,
+    version: s.version,
+    releaseNotes: s.releaseNotes ?? env.RELEASE_NOTES ?? null,
+    commandName: name,
+    previewSkillMd: s.text.slice(0, 20_000),
+    license: s.license ? String(s.license) : null,
     packageFiles: files,
     downloadUrl: key,
     installCommand: isPublic ? `npx skills add ${PUBLIC_REPO} --skill ${name}` : null,
@@ -152,33 +146,58 @@ for (const name of skillDirs) {
   uploads.push({ key, buffer });
 }
 
-for (const name of packDirs) {
-  const dir = join('packs', name);
-  const { data, text } = readFrontmatter(join(dir, 'PACK.md'));
-  const members = Array.isArray(data.skills) ? data.skills.map(String) : [];
-  const affected =
-    touched(`packs/${name}/`) || members.some((s) => touched(`skills/${s}/`));
-  if (!affected) continue;
+for (const pack of packs) {
+  const members = pack.skillNames;
   for (const s of members) {
-    if (!skillDirs.includes(s)) throw new Error(`pack ${name}: unknown skill ${s}`);
+    if (!skillNames.includes(s)) throw new Error(`pack ${pack.name}: unknown skill ${s}`);
   }
-  const { buffer, files } = await zipFolders([
-    { dir, prefix: name },
-    ...members.map((s) => ({ dir: join('skills', s), prefix: join(name, 'skills', s) })),
-  ]);
-  const key = r2Key(name, buffer);
-  const payload = basePayload({ name, data, text, kind: 'pack' });
-  const isPublic = PRICING === 'free' && payload.isFree;
+  const affected = marketplaceTouched || members.some((s) => touched(`skills/${s}/`));
+  if (!affected) continue;
+  const meta = pack.metadata?.clawshelf ?? {};
+  const isPublic = PRICING === 'free';
+  const readme = [
+    `# ${pack.displayName ?? titleCase(pack.name)}`,
+    '',
+    pack.description ?? '',
+    '',
+    '## Included skills',
+    '',
+    ...members.map((s) => `- **${readSkill(s).title ?? titleCase(s)}** (\`${s}\`) — ${readSkill(s).summary ?? ''}`),
+    '',
+    '## Install',
+    '',
+    isPublic
+      ? `\`\`\`bash\nnpx skills add ${PUBLIC_REPO} ${members.map((s) => `--skill ${s}`).join(' ')}\n\`\`\`\n\nClaude Code: \`/plugin marketplace add ${PUBLIC_REPO}\`, then \`/plugin install ${pack.name}@${marketplace.name}\`.`
+      : 'Pro members install it from clawshelf.com or from their agent with an API key.',
+    '',
+  ].join('\n');
+  const { buffer, files } = await zipFolders(
+    members.map((s) => ({ dir: join('skills', s), prefix: join(pack.name, 'skills', s) }))
+  );
+  const key = r2Key(pack.name, buffer);
   items.push({
-    ...payload,
+    action: 'publish',
+    slug: `${SLUG_PREFIX}${pack.name}`,
+    type: 'pack',
     packItems: members.map((s) => `${SLUG_PREFIX}${s}`),
+    title: pack.displayName ?? titleCase(pack.name),
+    summary: firstSentence(pack.description ?? '', 300),
+    summaryZh: meta.summaryZh ?? null,
+    description: String(pack.description ?? '').slice(0, 4000),
+    category: pack.category ?? 'other',
+    outputType: meta.outputType ?? null,
+    agents: AGENTS,
+    ...pricing(meta.price),
+    version: String(pack.version ?? '1.0.0'),
+    releaseNotes: meta.releaseNotes ?? env.RELEASE_NOTES ?? null,
+    commandName: pack.name,
+    previewSkillMd: readme,
+    license: pack.license ?? null,
     packageFiles: files,
     downloadUrl: key,
-    installCommand: isPublic
-      ? `npx skills add ${PUBLIC_REPO} ${members.map((s) => `--skill ${s}`).join(' ')}`
-      : null,
-    githubPath: isPublic ? `packs/${name}` : null,
-    sourceUrl: isPublic ? `https://github.com/${PUBLIC_REPO}/tree/master/packs/${name}` : null,
+    installCommand: isPublic ? `npx skills add ${PUBLIC_REPO} ${members.map((s) => `--skill ${s}`).join(' ')}` : null,
+    githubPath: isPublic ? '.claude-plugin/marketplace.json' : null,
+    sourceUrl: isPublic ? `https://github.com/${PUBLIC_REPO}` : null,
   });
   uploads.push({ key, buffer });
 }
@@ -190,7 +209,7 @@ if (items.length === 0) {
 
 if (DRY_RUN) {
   for (const item of items) {
-    console.log(`[dry-run] ${item.slug} v${item.version} → ${item.downloadUrl} (${item.packageFiles.length} files)`);
+    console.log(`[dry-run] ${item.slug} v${item.version} ${item.isFree ? 'free' : item.priceCents ? `$${item.priceCents / 100}` : 'pro'} → ${item.downloadUrl} (${item.packageFiles.length} files)`);
   }
   process.exit(0);
 }
@@ -202,11 +221,10 @@ for (const name of ['PUBLISH_SECRET', 'STORAGE_ENDPOINT', 'STORAGE_ACCESS_KEY_ID
   }
 }
 
-const endpoint = env.STORAGE_ENDPOINT.replace(/\/$/, '');
 const s3 = new s3mini({
   accessKeyId: env.STORAGE_ACCESS_KEY_ID,
   secretAccessKey: env.STORAGE_SECRET_ACCESS_KEY,
-  endpoint: `${endpoint}/${env.STORAGE_BUCKET_NAME}`,
+  endpoint: `${env.STORAGE_ENDPOINT.replace(/\/$/, '')}/${env.STORAGE_BUCKET_NAME}`,
   region: env.STORAGE_REGION || 'auto',
 });
 
@@ -215,27 +233,34 @@ for (const { key, buffer } of uploads) {
   console.log(`uploaded ${key}`);
 }
 
-const response = await fetch(`${SITE_URL}/api/skills/ingest`, {
-  method: 'POST',
-  headers: {
-    authorization: `Bearer ${env.PUBLISH_SECRET}`,
-    'content-type': 'application/json',
-  },
-  body: JSON.stringify({ items }),
-});
-const result = await response.json().catch(() => ({}));
-if (!response.ok) {
-  console.error(`ingest failed: HTTP ${response.status}`, result);
-  process.exit(1);
+// The ingest API accepts at most 50 items per request
+const replaced = [];
+const errors = [];
+for (let i = 0; i < items.length; i += 50) {
+  const response = await fetch(`${SITE_URL}/api/skills/ingest`, {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${env.PUBLISH_SECRET}`,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({ items: items.slice(i, i + 50) }),
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    console.error(`ingest failed: HTTP ${response.status}`, result);
+    process.exit(1);
+  }
+  console.log('published:', result.ok);
+  replaced.push(...(result.replaced ?? []));
+  errors.push(...(result.errors ?? []));
 }
-console.log('published:', result.ok);
 
-for (const { downloadUrl } of result.replaced ?? []) {
+for (const { downloadUrl } of replaced) {
   await s3.deleteObject(downloadUrl);
   console.log(`deleted old ${downloadUrl}`);
 }
 
-if (result.errors?.length) {
-  console.error('errors:', result.errors);
+if (errors.length) {
+  console.error('errors:', errors);
   process.exit(1);
 }

@@ -13,7 +13,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Check SKILL.md format
+      - uses: astral-sh/setup-uv@v6
+      - run: npm ci --no-audit --no-fund
+      - name: Agent Skills spec (official agentskills validator)
+        run: for dir in skills/*/; do uvx --from skills-ref agentskills validate "$dir"; done
+      - name: Claude Code plugin marketplace
+        run: npx -y @anthropic-ai/claude-code plugin validate .
+      - name: House rules (metadata strings, packs, marketplace in sync)
         run: node scripts/validate.mjs
       - name: Skills CLI can discover every skill
         run: npx -y skills@latest add ./ --list
