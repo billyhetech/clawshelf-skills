@@ -147,7 +147,7 @@ for (const name of skillDirs) {
     downloadUrl: key,
     installCommand: isPublic ? `npx skills add ${PUBLIC_REPO} --skill ${name}` : null,
     githubPath: isPublic ? `skills/${name}` : null,
-    sourceUrl: isPublic ? `https://github.com/${PUBLIC_REPO}/tree/main/skills/${name}` : null,
+    sourceUrl: isPublic ? `https://github.com/${PUBLIC_REPO}/tree/master/skills/${name}` : null,
   });
   uploads.push({ key, buffer });
 }
@@ -178,7 +178,7 @@ for (const name of packDirs) {
       ? `npx skills add ${PUBLIC_REPO} ${members.map((s) => `--skill ${s}`).join(' ')}`
       : null,
     githubPath: isPublic ? `packs/${name}` : null,
-    sourceUrl: isPublic ? `https://github.com/${PUBLIC_REPO}/tree/main/packs/${name}` : null,
+    sourceUrl: isPublic ? `https://github.com/${PUBLIC_REPO}/tree/master/packs/${name}` : null,
   });
   uploads.push({ key, buffer });
 }

@@ -30,12 +30,12 @@ Prefer to browse first? Every skill has a page with examples on [clawshelf.com/s
 
 - **Only skills made by ClawShelf live here.** Third-party skills listed on ClawShelf install from their authors' own repos and stay credited to them.
 - Every change is a pull request. CI checks that each `SKILL.md` follows the spec and that the skills CLI can discover it.
-- Merging to `main` publishes the update: `npx skills update` picks it up, and clawshelf.com refreshes its catalog.
+- Merging to `master` publishes the update: `npx skills update` picks it up, and clawshelf.com refreshes its catalog.
 - Premium (Pro) skills are not in this repo; they install from clawshelf.com with an API key.
 
 ## Publishing (maintainers)
 
-Every push to `main` that touches `skills/` or `packs/` runs `.github/workflows/publish.yml`. It zips each changed skill, uploads it to ClawShelf's storage, and updates its page on clawshelf.com. Bump `version` to add a changelog entry. Optional fields in `SKILL.md` frontmatter:
+Every push to `master` that touches `skills/` or `packs/` runs `.github/workflows/publish.yml`. It zips each changed skill, uploads it to ClawShelf's storage, and updates its page on clawshelf.com. Bump `version` to add a changelog entry. Optional fields in `SKILL.md` frontmatter:
 
 ```yaml
 metadata:
